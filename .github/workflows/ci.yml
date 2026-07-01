@@ -1,0 +1,30 @@
+name: CI
+
+# TEMPORARY reduced pipeline.
+# The full lint (ruff) + type-check (mypy strict) + pytest suite lands with the
+# scaffolding phase. For now CI just verifies the Python sources parse, so the
+# repo has a green check without pretending tests/type-checks exist yet.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Compile-check sources
+        run: python -m compileall -q notebooks prototype_search.py

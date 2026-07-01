@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Tooling caches
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Dataset: 6 GB of images + zip. Never commit; see data/README.md to fetch.
+/data/*
+!/data/README.md
+
+# Results: commit figures + metrics, but not bulky regenerable caches.
+/results/**/*.csv
+*.pth
+*.ckpt
+*.onnx
+*.safetensors
+*.index
+*.faiss
+
+# Experiment tracking
+wandb/
+
+# Secrets / local env
+.env
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
