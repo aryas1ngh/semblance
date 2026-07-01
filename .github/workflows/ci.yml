@@ -27,4 +27,4 @@ jobs:
           python-version: "3.11"
 
       - name: Compile-check sources
-        run: python -m compileall -q notebooks prototype_search.py
+        run: python -m compileall -q src notebooks prototype_search.py

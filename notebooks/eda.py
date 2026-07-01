@@ -12,26 +12,18 @@ from __future__ import annotations
 
 import argparse
 import random
+import sys
 from pathlib import Path
 
 import matplotlib.pyplot as plt
 import pandas as pd
 from PIL import Image
 
-SPLITS = {"train": "Ebay_train.txt", "test": "Ebay_test.txt"}
+# Put the project root on the path so `src` is importable when this file is run
+# directly (python notebooks/eda.py) or imported from a notebook.
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-
-def load_split(root: Path, filename: str) -> pd.DataFrame:
-    """Load an SOP split file into a DataFrame.
-
-    The files are whitespace-delimited with a header row:
-    ``image_id class_id super_class_id path``.
-    """
-    df = pd.read_csv(root / filename, sep=r"\s+")
-    df.columns = [c.strip() for c in df.columns]
-    # super_class is encoded in the folder name too; keep the readable label.
-    df["category"] = df["path"].str.split("/").str[0].str.replace("_final", "", regex=False)
-    return df
+from src.data.splits import load_split  # noqa: E402  (canonical SOP split loader)
 
 
 def summarize(name: str, df: pd.DataFrame) -> None:
@@ -114,7 +106,7 @@ def main() -> None:
 
     args.out.mkdir(parents=True, exist_ok=True)
 
-    splits = {name: load_split(args.root, fn) for name, fn in SPLITS.items()}
+    splits = {name: load_split(args.root, name) for name in ("train", "test")}
     for name, df in splits.items():
         summarize(name, df)
 

@@ -1,0 +1,16 @@
+{
+  "split": "train",
+  "num_images": 59551,
+  "num_classes": 11318,
+  "p": 8,
+  "k": 4,
+  "batch_shape": [
+    32,
+    3,
+    224,
+    224
+  ],
+  "batches_per_epoch": 1860,
+  "pixel_min": -2.118,
+  "pixel_max": 2.64
+}

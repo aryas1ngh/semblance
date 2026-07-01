@@ -77,11 +77,12 @@ Current (what exists today):
 ```
 data/                 SOP dataset: not committed (see data/README.md)
 notebooks/            EDA only: eda.py, deep_eda.ipynb
+src/data/             dataset, PK sampler, augmentations, split loading
 results/              committed figures + metrics
 prototype_search.py   no-training baseline (refactors into src/ later)
 ```
 
-Planned as later phases land (`src/` with `data/`, `models/`, `train/`, `eval/`,
+Planned as later phases land (`src/` gains `models/`, `train/`, `eval/`,
 `index/`, `serve/`, `frontend/`; `configs/` for Hydra; `tests/`; `docker/`).
 Scaffolding is added when a phase actually needs it, not before.
 
@@ -101,6 +102,10 @@ pip install torch torchvision numpy pillow pandas matplotlib tqdm
 # 4. Explore the data / run the baseline
 python notebooks/eda.py
 python prototype_search.py --n-classes 600
+
+# 5. Verify the training data pipeline (PK batch + augmentations)
+pip install albumentations
+python -m src.data.smoke --p 8 --k 4
 ```
 
 ## Dataset
