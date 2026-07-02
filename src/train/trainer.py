@@ -11,6 +11,7 @@ import numpy as np
 import torch
 from pytorch_metric_learning import losses, miners
 from torch.utils.data import DataLoader
+from tqdm.auto import tqdm
 
 from src.data import PKSampler, SOPDataset, add_contiguous_labels, load_split
 from src.data.augmentations import build_eval_transform, build_train_transform
@@ -98,7 +99,8 @@ def train(cfg: TrainConfig) -> dict[str, float]:
         model.train()
         sampler.set_epoch(epoch)
         running = 0.0
-        for images, labels in train_loader:
+        bar = tqdm(train_loader, desc=f"epoch {epoch}/{cfg.epochs}", leave=False)
+        for images, labels in bar:
             images, labels = images.to(device), labels.to(device)
             emb = model(images)
             loss = loss_fn(emb, labels, miner(emb, labels))
@@ -106,6 +108,7 @@ def train(cfg: TrainConfig) -> dict[str, float]:
             loss.backward()
             opt.step()
             running += loss.item()
+            bar.set_postfix(loss=f"{loss.item():.4f}")
         avg_loss = running / sampler.num_batches
 
         embs, labs = embed_loader(model, eval_loader, device)
