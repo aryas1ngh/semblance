@@ -49,8 +49,10 @@ def set_seed(seed: int) -> None:
 
 
 def _eval_loader(df, root: Path, img_size: int, num_workers: int) -> DataLoader:
+    # num_workers=0: eval is small (~1k imgs) and avoids per-epoch worker
+    # teardown noise ("can only test a child process") in notebooks.
     ds = SOPDataset(root, df, build_eval_transform(img_size))
-    return DataLoader(ds, batch_size=128, num_workers=num_workers)
+    return DataLoader(ds, batch_size=128, num_workers=0)
 
 
 def train(cfg: TrainConfig) -> dict[str, float]:
@@ -69,7 +71,12 @@ def train(cfg: TrainConfig) -> dict[str, float]:
     sampler = PKSampler(
         train_df["label"].to_numpy(), cfg.p, cfg.k, cfg.batches_per_epoch, cfg.seed
     )
-    train_loader = DataLoader(train_ds, batch_sampler=sampler, num_workers=cfg.num_workers)
+    train_loader = DataLoader(
+        train_ds,
+        batch_sampler=sampler,
+        num_workers=cfg.num_workers,
+        persistent_workers=cfg.num_workers > 0,  # keep workers alive across epochs
+    )
 
     # --- eval data: sanity evaluates on the train subset, else a test-class sample ---
     if cfg.subset_classes is not None:
