@@ -118,7 +118,8 @@ Structured Feature Embedding*, CVPR 2016. Standard split, unchanged. See
 
 - [x] Data pipeline & EDA
 - [x] No-training baseline (pretrained ResNet50 retrieval)
-- [ ] Training (triplet, then ArcFace) with W&B tracking
+- [x] Triplet-loss trainer (`src/train`, `src/models`, `src/eval`) + Kaggle notebook — sanity-checked; full GPU run pending
+- [ ] ArcFace head + W&B tracking
 - [ ] Gallery indexing (Qdrant + FAISS)
 - [ ] FastAPI `/search` + Streamlit UI, `docker compose up`
 - [ ] Evaluation, embedding-space viz, failure-case analysis

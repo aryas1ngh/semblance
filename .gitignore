@@ -24,6 +24,7 @@ htmlcov/
 
 # Results: commit figures + metrics, but not bulky regenerable caches.
 /results/**/*.csv
+*.pt
 *.pth
 *.ckpt
 *.onnx
