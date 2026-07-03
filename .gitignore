@@ -22,6 +22,9 @@ htmlcov/
 /data/*
 !/data/README.md
 
+# Downloaded artifact archives (e.g. Kaggle results.zip)
+*.zip
+
 # Results: commit figures + metrics, but not bulky regenerable caches.
 /results/**/*.csv
 *.pt

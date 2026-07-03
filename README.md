@@ -4,8 +4,9 @@ Upload a product image, get back the most visually similar products from an
 indexed gallery, with similarity scores. A metric-learning retrieval system
 built on the **Stanford Online Products (SOP)** dataset.
 
-> **Status: in progress.** Data pipeline explored and a no-training baseline is
-> in place. Training, indexing, API, and deployment are upcoming. See the
+> **Status: in progress.** Data pipeline, trained metric-learning model
+> (Recall@1 90% on the eval subset), FAISS gallery index, and a FastAPI +
+> Streamlit search service are in place. Deployment is upcoming. See the
 > [roadmap](#roadmap).
 
 ---
@@ -76,14 +77,20 @@ Current (what exists today):
 
 ```
 data/                 SOP dataset: not committed (see data/README.md)
-notebooks/            EDA only: eda.py, deep_eda.ipynb
+models/               trained weights: not committed (see models/README.md)
+notebooks/            EDA + Kaggle training notebook
 src/data/             dataset, PK sampler, augmentations, split loading
+src/models/           ResNet50 embedder
+src/train/            triplet-loss trainer + CLI
+src/eval/             Recall@K
+src/index/            build the FAISS gallery index
+src/serve/            FastAPI /search service
+app/                  Streamlit UI
+Dockerfile, docker-compose.yml   run API + UI together
 results/              committed figures + metrics
-prototype_search.py   no-training baseline (refactors into src/ later)
+prototype_search.py   no-training baseline (throwaway)
 ```
 
-Planned as later phases land (`src/` gains `models/`, `train/`, `eval/`,
-`index/`, `serve/`, `frontend/`; `configs/` for Hydra; `tests/`; `docker/`).
 Scaffolding is added when a phase actually needs it, not before.
 
 ## Quickstart
@@ -108,6 +115,33 @@ pip install albumentations
 python -m src.data.smoke --p 8 --k 4
 ```
 
+## Search service
+
+Once you have a trained checkpoint at `models/best.pt` (see
+[`models/README.md`](models/README.md)):
+
+```bash
+# 1. Build the FAISS gallery index (embeds the test split, prints full-test Recall@K)
+python -m src.index.build --ckpt models/best.pt
+
+# 2. Start the API (terminal 1)
+CKPT=models/best.pt INDEX_DIR=results/index DATA_ROOT=data/Stanford_Online_Products \
+  uvicorn src.serve.api:app --port 8000
+#    docs -> http://localhost:8000/docs
+
+# 3. Start the UI (terminal 2), then open http://localhost:8501
+API_URL=http://localhost:8000 streamlit run app/streamlit_app.py
+```
+
+The API embeds an uploaded image with the trained model, does a cosine
+nearest-neighbour lookup over the gallery with **FAISS** (`IndexFlatIP` on
+L2-normalized vectors — exact search; swap to IVF/HNSW or a vector DB like
+Qdrant at scale), and returns the top-K products with similarity scores.
+
+On the full 60k test gallery the trained model reaches **Recall@1 63.9% /
+Recall@10 81.3%** (vs ~45–50% R@1 for the pretrained baseline). A one-command
+containerized run (`docker compose up`) is coming next.
+
 ## Dataset
 
 Stanford Online Products: Song et al., *Deep Metric Learning via Lifted
@@ -118,9 +152,10 @@ Structured Feature Embedding*, CVPR 2016. Standard split, unchanged. See
 
 - [x] Data pipeline & EDA
 - [x] No-training baseline (pretrained ResNet50 retrieval)
-- [x] Triplet-loss trainer (`src/train`, `src/models`, `src/eval`) + Kaggle notebook — sanity-checked; full GPU run pending
+- [x] Triplet-loss trainer (`src/train`, `src/models`, `src/eval`) + Kaggle notebook — Recall@1 90% on eval subset
+- [x] FAISS gallery index (`src/index`) + full-test Recall@K (R@1 63.9%)
+- [x] FastAPI `/search` + Streamlit UI
+- [ ] `docker compose up` one-command run
 - [ ] ArcFace head + W&B tracking
-- [ ] Gallery indexing (Qdrant + FAISS)
-- [ ] FastAPI `/search` + Streamlit UI, `docker compose up`
 - [ ] Evaluation, embedding-space viz, failure-case analysis
 - [ ] Hugging Face Spaces deploy

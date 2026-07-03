@@ -1,0 +1,12 @@
+# Serving image deps (torch/torchvision are installed separately as CPU wheels
+# in the Dockerfile to keep the image small).
+faiss-cpu
+fastapi
+uvicorn[standard]
+streamlit
+python-multipart
+requests
+albumentations
+pillow
+pandas
+numpy
