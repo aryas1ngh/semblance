@@ -1,0 +1,27 @@
+# Two services from one image: the FastAPI search API and the Streamlit UI.
+# Model, index, and images are mounted read-only at runtime (not baked in).
+services:
+  api:
+    build: .
+    command: uvicorn src.serve.api:app --host 0.0.0.0 --port 8000
+    ports:
+      - "8000:8000"
+    environment:
+      CKPT: /models/best.pt
+      INDEX_DIR: /index
+      DATA_ROOT: /data/Stanford_Online_Products
+      DEVICE: cpu
+    volumes:
+      - ./models:/models:ro
+      - ./results/index:/index:ro
+      - ./data:/data:ro
+
+  ui:
+    build: .
+    command: streamlit run app/streamlit_app.py --server.port 8501 --server.address 0.0.0.0
+    ports:
+      - "8501:8501"
+    environment:
+      API_URL: http://api:8000
+    depends_on:
+      - api

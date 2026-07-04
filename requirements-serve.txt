@@ -7,6 +7,9 @@ streamlit
 python-multipart
 requests
 albumentations
+# stringzilla 4.x is source-only (no linux/arm64 wheel), forcing a from-source
+# build that needs a C compiler; 3.x ships arm64 wheels. Pulled in via albucore.
+stringzilla<4
 pillow
 pandas
 numpy

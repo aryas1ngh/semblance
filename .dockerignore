@@ -1,0 +1,10 @@
+# Keep the build context small; these are mounted at runtime or not needed.
+.venv/
+data/
+results/
+models/
+notebooks/
+.git/
+__pycache__/
+*.pt
+*.pth

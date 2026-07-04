@@ -117,8 +117,21 @@ python -m src.data.smoke --p 8 --k 4
 
 ## Search service
 
-Once you have a trained checkpoint at `models/best.pt` (see
-[`models/README.md`](models/README.md)):
+With a trained checkpoint at `models/best.pt` and a built index at
+`results/index/` (see below), one command brings up the API and UI together:
+
+```bash
+docker compose up --build
+#   UI   -> http://localhost:8501
+#   API  -> http://localhost:8000/docs
+```
+
+Both services run from a single CPU-only image; the checkpoint, FAISS index, and
+image data are mounted **read-only** at runtime rather than baked in, so the
+image stays small and the artifacts stay out of the build context.
+
+<details>
+<summary>Build the index / run without Docker</summary>
 
 ```bash
 # 1. Build the FAISS gallery index (embeds the test split, prints full-test Recall@K)
@@ -132,6 +145,7 @@ CKPT=models/best.pt INDEX_DIR=results/index DATA_ROOT=data/Stanford_Online_Produ
 # 3. Start the UI (terminal 2), then open http://localhost:8501
 API_URL=http://localhost:8000 streamlit run app/streamlit_app.py
 ```
+</details>
 
 The API embeds an uploaded image with the trained model, does a cosine
 nearest-neighbour lookup over the gallery with **FAISS** (`IndexFlatIP` on
@@ -139,8 +153,7 @@ L2-normalized vectors — exact search; swap to IVF/HNSW or a vector DB like
 Qdrant at scale), and returns the top-K products with similarity scores.
 
 On the full 60k test gallery the trained model reaches **Recall@1 63.9% /
-Recall@10 81.3%** (vs ~45–50% R@1 for the pretrained baseline). A one-command
-containerized run (`docker compose up`) is coming next.
+Recall@10 81.3%** (vs ~45–50% R@1 for the pretrained baseline).
 
 ## Dataset
 
@@ -155,7 +168,7 @@ Structured Feature Embedding*, CVPR 2016. Standard split, unchanged. See
 - [x] Triplet-loss trainer (`src/train`, `src/models`, `src/eval`) + Kaggle notebook — Recall@1 90% on eval subset
 - [x] FAISS gallery index (`src/index`) + full-test Recall@K (R@1 63.9%)
 - [x] FastAPI `/search` + Streamlit UI
-- [ ] `docker compose up` one-command run
+- [x] `docker compose up` one-command run
 - [ ] ArcFace head + W&B tracking
 - [ ] Evaluation, embedding-space viz, failure-case analysis
 - [ ] Hugging Face Spaces deploy
